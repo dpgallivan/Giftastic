@@ -1,123 +1,91 @@
 $(document).ready(function() {
 
-var topics = ["Batman", "Superman", "Wonderwoman", "Aquaman", "Cyborg", "Green Lantern", "Flash", "Green Arrow", "Robin", "Captain America", "Iron Man", "Hulk", "Thor", "Hawkeye", "Dr.Strange", "Falcon", "SpidermanpersonVision", "Black Panther"];
-		console.log(topics);
-	// My clicks are not working at all...and my console log isnt logging anything either
-	$("button").on("click", function() {
-		var hero = $("this").data("search");
-		console.log(x);
-		var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +hero+ "&api_key=dc6zaTOxFJmzC&limit=10";
-		console.log(queryURL)
+  var animals = [
+    "dog", "cat", "rabbit", "hamster", "skunk", "goldfish",
+    "bird", "ferret", "turtle", "sugar glider", "chinchilla",
+    "hedgehog", "hermit crab", "gerbil", "pygmy goat", "chicken",
+    "capybara", "teacup pig", "serval", "salamander", "frog"
+  ];
 
-		$.ajax({
-			url:queryURL,
-			method:"GET"
-		})
-		.done(function(response){
-			console.log(response);
-			var results = response.data
+  // function to make buttons and add to page
+  function populateButtons(arrayToUse, classToAdd, areaToAddTo) {
+    $(areaToAddTo).empty();
 
-			for (var i = 0; i < results.length; i++) {
-				var heroDIV = $("<div>");
-				var p = $("<p>");
-				p.text(results[i].rating);
-				var heroImg = $("<img>");
-				heroImg.addClass("anotherImg")
-				heroImg.attr('src', results[i].images.fixed_height.url);
-				// I think this is the last part of the click function??
-				heroDiv.append(heroImg)
-				heroDiv.prepend("#heroes-view");
-			}
+    for (var i = 0; i < arrayToUse.length; i++) {
+      var a = $("<button>");
+      a.addClass(classToAdd);
+      a.attr("data-type", arrayToUse[i]);
+      a.text(arrayToUse[i]);
+      $(areaToAddTo).append(a);
+    }
 
-		$(".anotherImg").on("click", function() {
-		// Im still confused on what 'data' does 
-			var state = $(this).attr("data-state");
-			if (state === 'still') {
-				// Im not sure if this is right; got from StackOverflow
-				$(this).attr('src',$(this).data('animate'));
-				$(this).attr('data-state', 'animate');
-			} else {
-				$(this).attr('src',$(this).data('still'));
-				$(this).attr('data-state', 'still');
-			}
-		});
-	});
+  }
 
-	var animals = [''];
+  $(document).on("click", ".animal-button", function() {
+    $("#animals").empty();
+    $(".animal-button").removeClass("active");
+    $(this).addClass("active");
 
-    $('#addHero').on('click', function(){
-    	var heroButton = $("#hero-input").val();
-		var newButton = $("<button>").addClass( "btn btn-info hero").attr('data-search',heroButton).html(heroButton)
-        $("#heroesbuttons").append(newButton);
-        	console.log("hello?");
-// are we suppose to put this again???
-        queryURL = "https://api.giphy.com/v1/gifs/search?q=" + heroButton + "&api_key=dc6zaTOxFJmzC&limit=10";
-        	console.log(animalButton);
+    var type = $(this).attr("data-type");
+    var queryURL = "http://api.giphy.com/v1/gifs/search?q=" + type + "&api_key=dc6zaTOxFJmzC&limit=10";
 
-        $.ajax({
-        url: queryURL,
-        method: 'GET'
-        })
-		.done(function(response) {
-			var results = response.data;
+    $.ajax({
+      url: queryURL,
+      method: "GET"
+    })
+    .done(function(response) {
+      var results = response.data;
 
-            for (var i = 0; i < results.length; i++) {
-				var heroDiv = $('<div>');
-                var p =$('<p/>');
-                p.text(results[i].rating);
-                var heroImage = $('<img/>');
-                heroImage.addClass('anImg')
-                heroImage.attr('src', results[i].images.fixed_height_still.url);
-                heroImage.attr('data-still', results[i].images.fixed_height_still.url)
-                heroImage.attr('data-animate', results[i].images.fixed_height.url)
-                .attr('data-state', 'still');
-                heroDiv.append(p);
-                heroDiv.append(heroImage);
-                heroDiv.prependTo($("#heroes-view"));
-            }
+      for (var i = 0; i < results.length; i++) {
+        var animalDiv = $("<div class=\"animal-item\">");
 
-            $('.anotherImg').on('click', function() {
-                var state = $(this).attr('data-search'); 
-                    console.log(this)
-                if (state == 'still') {
-              	  $(this).attr('src', $(this).data('animate'));
-              	  $(this).attr('data-search', 'animate')
-                } else {     
-              	  $(this).attr('src', $(this).data('still'));
-              	  $(this).attr('data-search', 'still');
-                }      
-            });
-        });
+        var rating = results[i].rating;
+
+        var p = $("<p>").text("Rating: " + rating);
+
+        var animated = results[i].images.fixed_height.url;
+        var still = results[i].images.fixed_height_still.url;
+
+        var animalImage = $("<img>");
+        animalImage.attr("src", still);
+        animalImage.attr("data-still", still);
+        animalImage.attr("data-animate", animated);
+        animalImage.attr("data-state", "still");
+        animalImage.addClass("animal-image");
+
+        animalDiv.append(p);
+        animalDiv.append(animalImage);
+
+        $("#animals").append(animalDiv);
+      }
+    });
+  });
+
+  $(document).on("click", ".animal-image", function() {
+
+    var state = $(this).attr("data-state");
+
+    if (state === "still") {
+      $(this).attr("src", $(this).attr("data-animate"));
+      $(this).attr("data-state", "animate");
+    }
+    else {
+      $(this).attr("src", $(this).attr("data-still"));
+      $(this).attr("data-state", "still");
+    }
+  });
+
+  $("#add-animal").on("click", function(event) {
+    event.preventDefault();
+    var newAnimal = $("input").eq(0).val();
+
+    if (newAnimal.length > 2) {
+      animals.push(newAnimal);
+    }
+
+    populateButtons(animals, "animal-button", "#animal-buttons");
+
+  });
+
+  populateButtons(animals, "animal-button", "#animal-buttons");
 });
-
-		// var hero = $(this).attr("data-person");
-// ===============================================================
-// the bottom display shows the different methods i tried in order to get this thing working; I am also way over two hours on this hw
-// ==========================================================
-	//
-
-	// 		for (var i = 0; i < topics.length; i++) {
-	// 			var gifDiv = $("<div class = 'item'>");
-	// 			var heroImg = $("<img>");
-	// 			heroImg.attr("src", topics[i].images.fixed_height.url);
-	// 			gifDiv.append(heroImg)
-	// 		}
-	// 	})
-	// })
-
-	// function displayTopicsInfo() {
-	// 	var heroes = $(this).attr("data-name");
-	// 	var queryURL = "https://api.giphy.com/v1/gifs/search?q=" + "&api_key=dc6zaTOxFJmzC&limit=10";
-
-	// 	$.ajax({
-	// 		url:queryURL
-	// 		method: "GET"
-	// 	}).done(function(response) {
-
-	// 		// var heroDiv = $("<div class = 'hero'>");
-	// 		// var imgURL = response.Poster;
-	// 		// var heroImg = $("<img>").attr("src", imgURL)
-	// 		// heroDiv.append(image)
-	// 		// $("#heroes-view").prepend(heroDiv)
-	// 	});
-	// }
